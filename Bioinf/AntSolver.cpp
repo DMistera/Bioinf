@@ -111,13 +111,19 @@ void AntSolver::solve(std::vector<std::string> nukleotydes, int n) {
 
 			//Update feromones
 			#pragma omp critical
-			updatePheromones(graph, solution);
+			addPheromones(graph, solution);
 		}
 
-		std::cout << "Iteration " << i << " completed." << std::endl;
+
+
+		std::cout << "Iteration " << i << " completed. Current best:" << bestSolution.size() << "/" << n - nukleotydes[0].length() + 1 << std::endl;
+
+		if (bestSolution.size() == n - nukleotydes[0].length() + 1) {
+			break;
+		}
 	}
 
-	printSolution(bestSolution, graph.getSize());
+	printSolution(bestSolution, n - nukleotydes[0].length() + 1);
 
 }
 
@@ -174,7 +180,7 @@ void AntSolver::updateProbability(Graph<Node, Connection>& graph) {
 	}
 }
 
-void AntSolver::updatePheromones(Graph<Node, Connection>& graph, std::list<Node>& solution) {
+void AntSolver::addPheromones(Graph<Node, Connection>& graph, std::list<Node>& solution) {
 	std::list<Node>::iterator it = solution.begin();
 	while (true) {
 		int i1 = (*it).index;
@@ -185,6 +191,17 @@ void AntSolver::updatePheromones(Graph<Node, Connection>& graph, std::list<Node>
 		int i2 = (*it).index;
 		Connection& connection = graph.getConnection(i1, i2);
 		connection.pheromone += EPSILON * pow((float)(solution.size()) / (float)(graph.getSize()), DELTA) / connection.cost;
+	}
+}
+
+void AntSolver::decreasePheromones(Graph<Node, Connection>& graph) {
+	for (int x = 0; x < graph.getSize(); x++) {
+		for (int y = 0; y < graph.getSize(); y++) {
+			if (x != y) {
+				Connection& connection = graph.getConnection(x, y);
+				connection.pheromone *= GAMMA;
+			}
+		}
 	}
 }
 

@@ -26,7 +26,8 @@ private:
 	int calculateCost(std::string left, std::string right);
 	int findStartingNodeIndex(Graph<Node, Connection>& graph);
 	void updateProbability(Graph<Node, Connection>& graph);
-	void updatePheromones(Graph<Node, Connection>& graph, std::list<Node>& solution);
+	void addPheromones(Graph<Node, Connection>& graph, std::list<Node>& solution);
+	void decreasePheromones(Graph<Node, Connection>& graph);
 	void printSolution(std::list<Node> solution, int maxSize);
 };
 
