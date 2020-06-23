@@ -11,6 +11,7 @@ private:
 	struct Connection {
 		int cost;
 		float pheromone;
+		float tempPheromone;
 		float probability;
 	};
 
@@ -27,6 +28,7 @@ private:
 	int findStartingNodeIndex(Graph<Node, Connection>& graph);
 	void updateProbability(Graph<Node, Connection>& graph);
 	void addPheromones(Graph<Node, Connection>& graph, std::list<Node>& solution);
+	void swapPheromones(Graph<Node, Connection>& graph);
 	void decreasePheromones(Graph<Node, Connection>& graph);
 	void printSolution(std::list<Node> solution, int maxSize);
 };

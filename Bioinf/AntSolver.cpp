@@ -18,7 +18,7 @@ void AntSolver::solve(std::vector<std::string> nukleotydes, int n, int maxLength
 				cost = 9999999;
 			}
 		}
-		return { calculateCost(left.value, right.value), 1.0f };
+		return { calculateCost(left.value, right.value), 1.0f, 0.0f };
 	};
 	Graph<Node, Connection> graph(nodes, mapper);
 
@@ -111,10 +111,10 @@ void AntSolver::solve(std::vector<std::string> nukleotydes, int n, int maxLength
 			}
 
 			if (solution.size() > bestSolution.size()) {
-				if (!onlyNegative || (onlyNegative && solution.size() >= maxLength)) {
+				//if (!onlyNegative || (onlyNegative && solution.size() >= maxLength)) {
 					#pragma omp critical
 					bestSolution = solution;
-				}
+				//}
 			}
 
 			//Update feromones
@@ -122,9 +122,9 @@ void AntSolver::solve(std::vector<std::string> nukleotydes, int n, int maxLength
 			addPheromones(graph, solution);
 		}
 
+		swapPheromones(graph);
 
-
-		//std::cout << "Iteration " << i << " completed. Current best:" << bestSolution.size() << "/" << maxLength << std::endl;
+		std::cout << "Iteration " << i << " completed. Current best:" << bestSolution.size() << "/" << maxLength << std::endl;
 
 		if (bestSolution.size() == maxLength) {
 			break;
@@ -197,7 +197,19 @@ void AntSolver::addPheromones(Graph<Node, Connection>& graph, std::list<Node>& s
 		}
 		int i2 = (*it).index;
 		Connection& connection = graph.getConnection(i1, i2);
-		connection.pheromone += EPSILON * pow((float)(solution.size()) / (float)(graph.getSize()), DELTA) / connection.cost;
+		connection.tempPheromone += EPSILON * pow((float)(solution.size()) / (float)(graph.getSize()), DELTA) / connection.cost;
+	}
+}
+
+void AntSolver::swapPheromones(Graph<Node, Connection>& graph) {
+	for (int x = 0; x < graph.getSize(); x++) {
+		for (int y = 0; y < graph.getSize(); y++) {
+			if (x != y) {
+				Connection& connection = graph.getConnection(x, y);
+				connection.pheromone = connection.tempPheromone;
+				connection.tempPheromone = 0;
+			}
+		}
 	}
 }
 
