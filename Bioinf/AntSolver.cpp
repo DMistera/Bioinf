@@ -4,14 +4,20 @@
 #include <ctime>
 #include <iostream>
 
-void AntSolver::solve(std::vector<std::string> nukleotydes, int n) {
-	srand(time(NULL));
+void AntSolver::solve(std::vector<std::string> nukleotydes, int n, int maxLength, bool onlyPositive, bool onlyNegative) {
+	srand(0);
 
 	// Prepare nodes
 	std::vector<Node> nodes = initNodes(nukleotydes);
 
 	// Create a graph
 	std::function<Connection(Node, Node)> mapper = [&](Node left, Node right) -> Connection {
+		int cost = calculateCost(left.value, right.value);
+		if (onlyPositive) {
+			if (cost >= 1) {
+				cost = 9999999;
+			}
+		}
 		return { calculateCost(left.value, right.value), 1.0f };
 	};
 	Graph<Node, Connection> graph(nodes, mapper);
@@ -105,8 +111,10 @@ void AntSolver::solve(std::vector<std::string> nukleotydes, int n) {
 			}
 
 			if (solution.size() > bestSolution.size()) {
-				#pragma omp critical
-				bestSolution = solution;
+				if (!onlyNegative || (onlyNegative && solution.size() >= maxLength)) {
+					#pragma omp critical
+					bestSolution = solution;
+				}
 			}
 
 			//Update feromones
@@ -116,15 +124,14 @@ void AntSolver::solve(std::vector<std::string> nukleotydes, int n) {
 
 
 
-		std::cout << "Iteration " << i << " completed. Current best:" << bestSolution.size() << "/" << n - nukleotydes[0].length() + 1 << std::endl;
+		//std::cout << "Iteration " << i << " completed. Current best:" << bestSolution.size() << "/" << maxLength << std::endl;
 
-		if (bestSolution.size() == n - nukleotydes[0].length() + 1) {
+		if (bestSolution.size() == maxLength) {
 			break;
 		}
 	}
 
-	printSolution(bestSolution, n - nukleotydes[0].length() + 1);
-
+	printSolution(bestSolution, maxLength);
 }
 
 std::vector<AntSolver::Node> AntSolver::initNodes(std::vector<std::string> nukleotydes) {
@@ -206,8 +213,9 @@ void AntSolver::decreasePheromones(Graph<Node, Connection>& graph) {
 }
 
 void AntSolver::printSolution(std::list<Node> solution, int maxSize) {
-	for (Node n : solution) {
+	/*for (Node n : solution) {
 		std::cout << n.value << std::endl;
-	}
-	std::cout << "Solution includes " << solution.size() << " out of " << maxSize << " nukleotydes.";
+	}*/
+	float percent = 100.0f * (float)solution.size() / (float)maxSize;
+	std::cout << "Solution includes " << solution.size() << " out of " << maxSize << " (" << percent << "%) nukleotydes." << std::endl;
 }

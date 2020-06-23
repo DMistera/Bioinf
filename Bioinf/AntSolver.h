@@ -20,7 +20,7 @@ private:
 	};
 
 	// Inherited via Solver
-	virtual void solve(std::vector<std::string> nodes, int n) override;
+	virtual void solve(std::vector<std::string> nodes, int n, int maxLength, bool onlyPositive, bool onlyNegative) override;
 
 	std::vector<Node> initNodes(std::vector<std::string> nukleotydes);
 	int calculateCost(std::string left, std::string right);

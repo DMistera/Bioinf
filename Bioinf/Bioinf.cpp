@@ -2,10 +2,14 @@
 //
 
 #include <iostream>
+#include <filesystem>
 #include "AntSolver.h"
 
 int main()
 {
     AntSolver solver;
-    solver.run("Instance.txt", 209);
+
+    for (const auto& entry : std::filesystem::directory_iterator("Instances")) {
+        solver.run(entry.path().generic_string());
+    }
 }
